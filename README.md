@@ -361,3 +361,8 @@ cor.test(x, y, alternative = , method = )
 ```
 #独立样本的 t 检验
 t.test(y ~ x, data)
+
+#非独立样本的 t 检验
+t.test(y ~ x, paired = TRUE)
+
+### 回归
