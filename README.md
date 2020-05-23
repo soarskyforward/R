@@ -245,10 +245,10 @@ summary(mtcars[myvars])
 #自建函数mystats()
 mystats <- function(x, na.omit=FALSE){
 if (na.omit)
-x <- x[!is.na(x)]
-m <- mean(x)
-n <- length(x)
-s <- sd(x)
+  x <- x[!is.na(x)]
+  m <- mean(x)
+  n <- length(x)
+  s <- sd(x)
 skew <- sum((x-m)^3/s^3)/n
 kurt <- sum((x-m)^4/s^4)/n - 3
 return(c(n=n, mean=m, stdev=s, skew=skew, kurtosis=kurt))
@@ -277,3 +277,60 @@ describeBy(mtcars[myvars], list(am = mtcars$am))
 ```
 
 #### 频数表和列联表
+一维列联表
+```
+options(digits = 3)
+library(vcd)
+mytable <- with(Arthritis, table(Improved))
+
+#prop.table()将这些频数转化为比例值
+prop.table(mytable)
+```
+
+二维列联表
+```
+#A是行变量，B是列变量
+mytable <- table(A, B)
+
+#xtabs()函数还可使用公式风格的输入创建列联表,要进行交叉分类的变量应出现在公式的右侧（即
+~符号的右方)
+mytable <- xtabs(~ Treatment + Improved, data = Arthritis)
+
+#使用margin.table()和prop.table()函数分别生成边际频数和比例
+#下标1指代table()语句中的第一个变量
+prop.table(mytable, 1)
+margin.table(mytable, 2)
+
+#可以使用addmargins()函数为这些表格添加边际和
+addmargins(mytable)
+```
+
+使用CrossTable生成二维列联表
+```
+library(gmodels)
+CrossTable(Arthritis$Treatment, Arthritis$Improved)
+```
+
+#### 独立性检验
+```
+#使用chisq.test()函数对二维表的行变量和列变量进行卡方独立性检验
+library(vcd)
+mytable <- xtabs(~Treatment + Improved, data = Arthritis)
+chisq.test(mytable)
+#在结果中，患者接受的治疗和改善的水平看上去存在着某种关系（p<0.01）,所以拒绝了治疗类型和治疗结果相互独立的原假
+设。
+
+#使用fisher.test()函数进行Fisher精确检验
+ mytable <- xtabs(~Treatment+Improved, data=Arthritis)
+ fisher.test(mytable)
+
+#mantelhaen.test()函数可用来进行Cochran-Mantel-Haenszel卡方检验
+ mytable <- xtabs(~Treatment+Improved+Sex, data=Arthritis)
+mantelhaen.test(mytable)
+
+#拒绝变量间相互独立的原假设后进行相关性的度量
+library(vcd)
+ mytable <- xtabs(~Treatment+Improved, data=Arthritis)
+assocstats(mytable)
+```
+#### 相关
