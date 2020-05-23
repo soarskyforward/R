@@ -334,3 +334,30 @@ library(vcd)
 assocstats(mytable)
 ```
 #### 相关
+ Pearson、Spearman和Kendall相关
+ >Pearson积差相关系数衡量了两个定量变量之间的线性相关程度。Spearman等级相关系数则衡
+量分级定序变量之间的相关程度。Kendall’s Tau相关系数也是一种非参数的等级相关度量。
+
+```
+#cor()函数可以计算这三种相关系数,默认参数为use="everything"和method="pearson";而cov()函数可用来计算协方差
+ states<- state.x77[,1:6]
+ cor(states)
+ cov(states)
+
+
+ #在默认情况下得到的结果是一个方阵（所有变量之间两两计算相关）。你同样可以计算非方形的相关矩阵。
+x <- states[,c("Population", "Income", "Illiteracy", "HS Grad")]
+y <- states[,c("Life Exp", "Murder")]
+cor(x,y)
+```
+相关性的显著性检验
+```
+#alternative则用来指定进行双侧检验或单侧检验（取值为"two.side"、"less"或"greater"），而method用以指定要计算的相关类型（"pearson"、
+"kendall" 或 "spearman" ）
+cor.test(x, y, alternative = , method = )
+```
+
+#### t 检验
+```
+#独立样本的 t 检验
+t.test(y ~ x, data)
