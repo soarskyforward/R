@@ -7,7 +7,22 @@
 ```
 library() # 显示库中的包
 install.library("gclus") #安装新的包
+update.package("gclus") #更新包
 library("gclus") #使用包
+```
+
+#### 工作空间
+```
+save.image("myfile") #保存工作空间到文件myfile中
+load("myfile") #读取工作空间
+```
+
+#### 输入与输出
+```
+source("filename") #在当前对话执行一个脚本
+sink("filename")  #将输出重定向到文件filename中
+pdf("filename.pdf") #图形输出
+jpeg("filename.jpeg")
 ```
 
 #### 创建数据集
@@ -83,13 +98,24 @@ mylist <- list(title=g, ages=h, j, k)
 
 #### 数据的输入
 ```
-fix(mydata)
+fix(mydata) #键盘输入数据
 mydata <- edit(mydata)
+
+#从csv文件中导入数据
+grades <- read.table("studentgrades.csv", header=TRUE,
+ row.names="StudentID", sep=",")
+
+#导入SPSS数据
+library("Hmisc")
+mydataframe <- spss.get("mydata.sav", use.value.labels=TRUE)  #use.value.labels=TRUE表示让函数将带有值标签的变量导入为R中水平对应相同的因子
+
 ```
+
+
 #### 创建新变量
 ```
 mydata<-data.frame(x1 = c(2, 2, 6, 4),
-x2 = c(3, 4, 2, 8)) 
+x2 = c(3, 4, 2, 8))
 mydata <- transform(mydata, sumx = x1 + x2,
           meanx = (x1 + x2)/2)
 #OR
@@ -98,8 +124,31 @@ mydata$sumx <- x1 + x2
 mydata$meanx <- (x1 + x2)/2
 detach(mydata)
 ```
+
+#### 基本绘图
+```
+dose <- c(20, 30, 40, 45, 60)
+drugA <- c(16, 20, 27, 40, 60)
+
+#在图形上添加标题（main）、副标题（sub）、坐标轴标
+签（xlab、ylab）并指定了坐标轴范围（xlim、ylim）。
+plot(dose, drugA, type="b",
+ col="red", lty=2, pch=2, lwd=2,
+ main="Clinical Trials for Drug A",
+ sub="This is hypothetical data",
+ xlab="Dosage", ylab="Drug Response",
+ xlim=c(0, 60), ylim=c(0, 70))
+
+ #图例
+ legend("topleft", title="Drug Type", c("A","B")
+ lty=c(1, 2), pch=c(15, 17), col=c("red", "blue"))
+ ```
+
 #### 处理缺失值
-```leadership$age[leadership$age == 99] <- NA ```
+```
+leadership$age[leadership$age == 99] <- NA
+```
+
 #### 日期处理   
 %d 日期 %m 月份 %Y 年份 %a 星期
 ```
@@ -122,3 +171,10 @@ total <- rbind(dataframeA, dataframeB) 	#纵向
 newdata <- subset(leadership, age >= 35 | age < 24,)
 select=c(q1, q2, q3, q4))
  ```
+#### 使用SQL语句操纵数据框
+```
+library("sqldf")
+
+#参数row.names=TRUE将原始数据框中的行名延续到了新数据框中
+newdf <- sqldf("select * from mtcars where carb = 1 order by mpg", row.name = TRUE)
+```
