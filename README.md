@@ -125,25 +125,6 @@ mydata$meanx <- (x1 + x2)/2
 detach(mydata)
 ```
 
-#### 基本绘图
-```
-dose <- c(20, 30, 40, 45, 60)
-drugA <- c(16, 20, 27, 40, 60)
-
-#在图形上添加标题（main）、副标题（sub）、坐标轴标
-签（xlab、ylab）并指定了坐标轴范围（xlim、ylim）。
-plot(dose, drugA, type="b",
- col="red", lty=2, pch=2, lwd=2,
- main="Clinical Trials for Drug A",
- sub="This is hypothetical data",
- xlab="Dosage", ylab="Drug Response",
- xlim=c(0, 60), ylim=c(0, 70))
-
- #图例
- legend("topleft", title="Drug Type", c("A","B")
- lty=c(1, 2), pch=c(15, 17), col=c("red", "blue"))
- ```
-
 #### 处理缺失值
 ```
 leadership$age[leadership$age == 99] <- NA
@@ -178,3 +159,121 @@ library("sqldf")
 #参数row.names=TRUE将原始数据框中的行名延续到了新数据框中
 newdf <- sqldf("select * from mtcars where carb = 1 order by mpg", row.name = TRUE)
 ```
+
+#### 基本绘图
+```
+dose <- c(20, 30, 40, 45, 60)
+drugA <- c(16, 20, 27, 40, 60)
+
+#在图形上添加标题（main）、副标题（sub）、坐标轴标
+签（xlab、ylab）并指定了坐标轴范围（xlim、ylim）。
+plot(dose, drugA, type="b",
+ col="red", lty=2, pch=2, lwd=2,
+ main="Clinical Trials for Drug A",
+ sub="This is hypothetical data",
+ xlab="Dosage", ylab="Drug Response",
+ xlim=c(0, 60), ylim=c(0, 70))
+
+ #图例
+ legend("topleft", title="Drug Type", c("A","B")
+ lty=c(1, 2), pch=c(15, 17), col=c("red", "blue"))
+ ```
+
+ 简单的条形图
+ ```
+library(vcd)
+counts <- table(Arthritis$Improved)
+#普通条形图
+ barplot(counts, main = "Simple Bar Plot",xlab="Improvement", ylab="Frequency")
+#水平条形图
+ barplot(counts, main="Horizontal Bar Plot",
+ xlab="Frequency", ylab="Improvement",
+ horiz=TRUE)
+
+ counts<-table(Arthritis$Improved,Arthritis$Treatment)
+#分组条形图
+ barplot(counts,main="Grouped Bar Plot",
+ xlab="Treatment", ylab="Frequency",
+ col=c("red", "yellow", "green"),
+ legend=rownames(counts), beside=TRUE)
+ ```
+
+ 饼图
+ ```
+ slices <- c(10, 12,4, 16, 8)
+lbls <- c("US", "UK", "Australia", "Germany", "France")
+pie(slices, labels = lbls, main="Simple Pie Chart")
+ ```
+
+ 直方图
+ ```
+ #参数freq=FALSE表示根据概率密度而不是频数绘制图形。参数breaks用于控制组的数量。
+ hist(mtcars$mpg,
+ freq=FALSE,
+ breaks=12,
+ col="red",
+ xlab="Miles Per Gallon",
+ main="Histogram, rug plot, density curve")
+#添加轴须图
+ lines(density(mtcars$mpg), col="blue", lwd=2)
+ ```
+
+ 箱线图
+ ```
+ boxplot(mtcars$mpg, main="Box plot", ylab="Miles per Gallon")
+ ```
+
+ 点图
+ ```
+ #cex控制标签的大小
+ dotchart(mtcars$mpg, labels=row.names(mtcars), cex=.7,
+ main="Gas Mileage for Car Models",
+ xlab="Miles Per Gallon")
+ ```
+
+
+## 基本统计分析
+
+#### 描述性统计
+```
+#通过summary()计算描述性统计量
+myvars <- c("mpg", "hp", "wt")
+summary(mtcars[myvars])
+
+
+#通过sapply()计算描述性统计量
+#自建函数mystats()
+mystats <- function(x, na.omit=FALSE){
+if (na.omit)
+x <- x[!is.na(x)]
+m <- mean(x)
+n <- length(x)
+s <- sd(x)
+skew <- sum((x-m)^3/s^3)/n
+kurt <- sum((x-m)^4/s^4)/n - 3
+return(c(n=n, mean=m, stdev=s, skew=skew, kurtosis=kurt))
+}
+sapply(mtcars[myvars], mystats)
+
+
+#通过Hmisc包中的describe()函数计算描述性统计量
+library(Hmisc)
+describe(mtcars[myvars])
+```
+
+使用aggregate()函数来分组获取描述性统计量
+```
+myvars <- c("mpg", "hp", "wt")
+#计算每组的均值
+aggregate(mtcars[myvars], by=list(am=mtcars$am), mean)
+#计算每组的标准差
+aggregate(mtcars[myvars], by=list(am=mtcars$am), sd)
+```
+使用psych包中的describeBy()分组计算概述统计量
+```
+library(psych)
+myvars <- c("mpg", "hp", "wt")
+describeBy(mtcars[myvars], list(am = mtcars$am))
+```
+
+#### 频数表和列联表
