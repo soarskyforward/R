@@ -387,3 +387,112 @@ myfit <- lm(formula, data)
 >当回归模型包含一个因变量和一个自变量时，我们称为简单线性回归。当只有一个预测变量，但同时包含变量的幂（比如，X、X2、X3）时，我们称为多项式回归。当有不止一个预测变量时，则称为多元线性回归。
 
 ##### 简单线性回归
+```
+fit <- lm(weight ~ height, data = women)
+summary(fit)
+
+plot(women$height, women$weight, xlab ="Height (in inches)",ylab="Weight (in pounds)")
+abline(fit)
+```
+##### 多项式回归
+>I函数将括号的内容看作R的一个常规表
+达式。因为^（参见表8-2）符号在表达式中有特殊的含义，会调用你并不需要的东西，所以此处
+必须要用这个函数。
+
+```
+fit2 <- lm(weight ~ height + I(height ^ 2), data = women)
+summary(fit2)
+
+plot(women$height,women$weight,
+ xlab="Height (in inches)",
+ ylab="Weight (in lbs)")
+lines(women$height, fitted(fit2))
+```
+```
+#car包的使用,spread=FALSE选项删除了残差正负均方根在平滑
+曲线上的展开和非对称信息。smoother.args=list(lty=2)选项设置loess拟合曲线为虚线。
+pch=19选项设置点为实心圆（默认为空心圆）。
+library(car)
+scatterplot(weight ~ height, data=women,
+ spread=FALSE, smoother.args=list(lty=2), pch=19,
+ main="Women Age 30-39",
+ xlab="Height (inches)",
+ ylab="Weight (lbs.)")
+```
+#### 多元线性回归
+
+```
+states <- as.data.frame(state.x77[,c("Murder", "Population","Illiteracy", "Income", "Frost")])
+
+#cor()函数提供了二变量之间的相关系数，car包中scatterplotMatrix()函数则会生成散点图矩阵
+cor(states)
+scatterplotMatrix(states, spread=FALSE, smoother.args=list(lty=2),
+main="Scatter Plot Matrix")
+
+fit <- lm(Murder ~ Population + Illiteracy + Income +Frost, data=states)
+summary(fit)
+lm(formula=Murder ~ Population + Illiteracy + Income + Frost, data=states)
+```
+有交互项的多元线性回归
+```
+ fit <- lm(mpg ~ hp + wt + hp:wt, data=mtcars)
+ summary(fit)
+ lm(formula = mpg ~ hp + wt + hp:wt, data=mtcars)
+```
+
+
+#### 回归诊断
+```
+states <- as.data.frame(state.x77[,c("Murder", "Population","Illiteracy", "Income", "Frost")])
+fit <- lm(Murder ~ Population + Illiteracy + Income +Frost, data=states)
+confint(fit)
+```
+##### 标准方法
+>R基础安装中提供了大量检验回归分析中统计假设的方法。最常见的方法就是对lm()函数
+返回的对象使用plot()函数，可以生成评价模型拟合情况的四幅图形。
+```
+fit <- lm(weight ~ height, data = women)
+par(mfrow = c(2,2))
+plot(fit)
+```
+ 正态性 当预测变量值固定时，因变量成正态分布，则残差值也应该是一个均值为0的正
+态分布。“正态Q-Q图”（Normal Q-Q，右上）是在正态分布对应的值下，标准化残差的概
+率图。若满足正态假设，那么图上的点应该落在呈45度角的直线上；若不是如此，那么
+就违反了正态性的假设。
+ 独立性 你无法从这些图中分辨出因变量值是否相互独立，只能从收集的数据中来验证。
+上面的例子中，没有任何先验的理由去相信一位女性的体重会影响另外一位女性的体重。
+假若你发现数据是从一个家庭抽样得来的，那么可能必须要调整模型独立性的假设。
+ 线性 若因变量与自变量线性相关，那么残差值与预测（拟合）值就没有任何系统关联。
+换句话说，除了白噪声，模型应该包含数据中所有的系统方差。在“残差图与拟合图”
+（Residuals vs Fitted，左上）中可以清楚地看到一个曲线关系，这暗示着你可能需要对回
+归模型加上一个二次项。
+ 同方差性 若满足不变方差假设，那么在“位置尺度图”（Scale-Location Graph，左下）
+中，水平线周围的点应该随机分布。该图似乎满足此假设。
+
+##### 改进的方法
+>car包提供了大量函数，大大增强了拟合和评价回归模型的能力
+```
+#正态性
+library(car)
+states <- as.data.frame(state.x77[,c("Murder", "Population",
+ "Illiteracy", "Income", "Frost")])
+fit <- lm(Murder ~ Population + Illiteracy + Income + Frost, data=states)
+
+#method = "identify"选项能够交互式绘图——待图形绘制后，用鼠标单击图形内的点，将会标注函数中labels选项的设定值
+#当simulate=TRUE时，95%的置信区间将会用参数自助法生成。
+qqPlot(fit, labels=row.names(states), id.method="identify",
+ simulate=TRUE, main="Q-Q Plot")
+
+ #误差的独立性
+ #car包提供了一个可做Durbin-Watson检验的函数，能够检测误差的序列相关性
+ durbinWatsonTest(fit)
+
+ # 线性
+  crPlots(fit)
+
+# 同方差性
+ ncvTest(fit)
+spreadLevelPlot(fit)
+```
+
+#### 方差分析
