@@ -229,6 +229,56 @@ pie(slices, labels = lbls, main="Simple Pie Chart")
  xlab="Miles Per Gallon")
  ```
 
+散点图
+```
+plot(wt, mpg,
+ main="Basic Scatter plot of MPG vs. Weight",
+ xlab="Car Weight (lbs/1000)",
+ ylab="Miles Per Gallon ", pch=19)
+ #abline()函数用来添加最佳拟合的线性直线，而lowess()函数则用来添加一条平滑曲线
+abline(lm(mpg~wt), col="red", lwd=2, lty=1)
+lines(lowess(wt,mpg), col="blue", lwd=2, lty=2)
+
+#car包中的scatterplot()函数增强了散点图的许多功能，它可以很方便地绘制散点图
+#表达式mpg ~ wt | cyl表示按条件绘图（即按cyl的水平分别绘制mpg和wt的关系图）
+library(car)
+scatterplot(mpg ~ wt | cyl, data=mtcars, lwd=2, span=0.75,
+ main="Scatter Plot of MPG vs. Weight by # Cylinders",
+ xlab="Weight of Car (lbs/1000)",
+ ylab="Miles Per Gallon",
+ legend.plot=TRUE,
+ id.method="identify",
+ labels=row.names(mtcars),
+ boxplots="xy"
+)
+```
+
+折线图
+>p 只有点
+l 只有线
+o 实心点和线（即线覆盖在点上）
+b、c 线连接点（c 时不绘制点）
+s、S 阶梯线
+h 直方图式的垂直线
+n 不生成任何点和线（通常用来为后面的命令创建坐标轴）
+
+```
+opar <- par(no.readonly=TRUE)
+par(mfrow=c(1,2))
+t1 <- subset(Orange, Tree==1)
+plot(t1$age, t1$circumference,
+ xlab="Age (days)",
+ ylab="Circumference (mm)",
+ main="Orange Tree 1 Growth")
+plot(t1$age, t1$circumference,
+ xlab="Age (days)",
+ ylab="Circumference (mm)",
+ main="Orange Tree 1 Growth",
+ type="b")
+par(opar)
+
+```
+
 
 ## 基本统计分析
 
@@ -333,8 +383,7 @@ assocstats(mytable)
 ```
 #### 相关
  Pearson、Spearman和Kendall相关
- >Pearson积差相关系数衡量了两个定量变量之间的线性相关程度。Spearman等级相关系数则衡
-量分级定序变量之间的相关程度。Kendall’s Tau相关系数也是一种非参数的等级相关度量。
+ >Pearson积差相关系数衡量了两个定量变量之间的线性相关程度。Spearman等级相关系数则衡量分级定序变量之间的相关程度。Kendall’s Tau相关系数也是一种非参数的等级相关度量。
 
 ```
 #cor()函数可以计算这三种相关系数,默认参数为use="everything"和method="pearson";而cov()函数可用来计算协方差
@@ -395,9 +444,7 @@ plot(women$height, women$weight, xlab ="Height (in inches)",ylab="Weight (in pou
 abline(fit)
 ```
 ##### 多项式回归
->I函数将括号的内容看作R的一个常规表
-达式。因为^（参见表8-2）符号在表达式中有特殊的含义，会调用你并不需要的东西，所以此处
-必须要用这个函数。
+>I函数将括号的内容看作R的一个常规表达式。因为^符号在表达式中有特殊的含义，会调用你并不需要的东西，所以此处须要用这个函数。
 
 ```
 fit2 <- lm(weight ~ height + I(height ^ 2), data = women)
@@ -471,6 +518,7 @@ plot(fit)
 
 ##### 改进的方法
 >car包提供了大量函数，大大增强了拟合和评价回归模型的能力
+
 ```
 #正态性
 library(car)
@@ -496,3 +544,45 @@ spreadLevelPlot(fit)
 ```
 
 #### 方差分析
+ANOVA模型拟合
+```
+#单因素方差分析,以multcomp包中的cholesterol数据集为例
+library(multcomp)
+attach(cholesterol)
+table(trt)
+aggregate(response, by = list(trt), FUN = mean)
+aggregate(response, by = list(trt), FUN = sd)
+
+#检验组间差异（ANOVA）
+fit <- aov(response ~ trt)
+summary(fit)
+
+#绘制各组均值及其置信区间的图形
+library(gplots)
+plotmeans(response ~ trt, xlab="Treatment", ylab="Response",
+main="Mean Plot\nwith 95% CI")
+```
+多重比较
+>虽然ANOVA对各疗法的F检验表明五种药物疗法效果不同，但是并没有告诉你哪种疗法与其
+他疗法不同。多重比较可以解决这个问题。
+```
+TukeyHSD(fit)
+
+#第一个par语句用来旋转轴标签，第二个用来增大左边界的面积，
+par(las = 2)
+par(mar = c(5,8,4,2))
+plot(TukeyHSD(fit))
+```
+
+单因素协方差分析
+>单因素协方差分析（ANCOVA）扩展了单因素方差分析（ANOVA），包含一个或多个定量的
+协变量。
+```
+#例子来自于multcomp包中的litter数据集
+attach(litter)
+table(dose)
+aggregate(weight, by=list(dose), FUN=mean)
+
+fit <- aov(weight ~ gesttime + dose)
+summary(fit)
+```
