@@ -565,6 +565,7 @@ main="Mean Plot\nwith 95% CI")
 多重比较
 >虽然ANOVA对各疗法的F检验表明五种药物疗法效果不同，但是并没有告诉你哪种疗法与其
 他疗法不同。多重比较可以解决这个问题。
+
 ```
 TukeyHSD(fit)
 
@@ -577,6 +578,7 @@ plot(TukeyHSD(fit))
 单因素协方差分析
 >单因素协方差分析（ANCOVA）扩展了单因素方差分析（ANOVA），包含一个或多个定量的
 协变量。
+
 ```
 #例子来自于multcomp包中的litter数据集
 attach(litter)
